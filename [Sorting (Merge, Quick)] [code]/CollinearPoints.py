@@ -2,8 +2,52 @@ import math
 import timeit
 import random
 
+
 def collinearPoints(points):
-    return None
+    to_return = []
+
+    for i in points:
+        pointswithslope = []
+        for j in points:
+            if i != j:
+                if j[0] - i[0] != 0:
+                    slope = (j[1] - i[1]) / (j[0] - i[0])
+                else:
+                    slope = float('inf')  # 기울기가 무한대인 경우 (수직선)
+                pointswithslope.append((i, j, slope))
+
+        pointswithslope.sort(key=lambda p: p[2])  # 기울기 기준으로 정렬
+
+        cnt = 1
+        temp_points = [i]
+        for j in range(0, len(pointswithslope) - 1):
+            if pointswithslope[j][2] == pointswithslope[j + 1][2]:
+                temp_points.append(pointswithslope[j][1])
+                cnt += 1
+            else:
+                if cnt >= 3:
+                    temp_points.append(pointswithslope[j][1])
+                    temp_points.sort()  # 최소, 최대점을 찾기 위해 정렬
+                    to_return.append((temp_points[0], temp_points[-1]))
+                cnt = 1
+                temp_points = [i]
+
+        # 마지막 기울기에 대한 처리
+        if cnt >= 3:
+            temp_points.append(pointswithslope[-1][1])
+            temp_points.sort()  # 최소, 최대점을 찾기 위해 정렬
+            to_return.append((temp_points[0], temp_points[-1]))
+
+    # 중복되는 최소-최대 점 쌍 제거
+    to_return = list(set(to_return))
+
+    # 출력 형식 변경: (x1, y1, x2, y2)
+    real_return = [(p[0][0], p[0][1], p[1][0], p[1][1]) for p in to_return]
+    real_return.sort(key=lambda p: (p[0], p[1], p[2], p[3]))  # 결과 정렬
+
+    return real_return
+
+
 
 
 def correctnessTest(input, expected_output, correct):
