@@ -38,9 +38,14 @@ def collinearPoints(points):
             temp_points.sort()
             to_return.append((temp_points[0], temp_points[-1]))
 
-    to_return = list(set(to_return))
+    to_return.sort()
+    real_return = []
 
-    real_return = [(p[0][0], p[0][1], p[1][0], p[1][1]) for p in to_return]
+    for i in range(len(to_return)):
+        if i == 0 or to_return[i] != to_return[i - 1]:
+            real_return.append(to_return[i])
+
+    real_return = [(p[0][0], p[0][1], p[1][0], p[1][1]) for p in real_return]
     real_return.sort(key=lambda p: (p[0], p[1], p[2], p[3]))
 
     return real_return
