@@ -12,6 +12,7 @@ def collinearPoints(points):
             if i != j:
                 if j[0] - i[0] != 0:
                     slope = (j[1] - i[1]) / (j[0] - i[0])
+                    slope = math.floor(slope*1000000)/1000000
                 else:
                     slope = float('inf')
                 pointswithslope.append((i, j, slope))
