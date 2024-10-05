@@ -1,4 +1,5 @@
 import copy
+import queue
 import random
 from queue import PriorityQueue
 
@@ -7,7 +8,7 @@ class Board:
         self.n = len(tiles)
         self.tiles = copy.deepcopy(tiles)
         self.twinBoard = None
-        
+
         # Compute Hamming distance
         self.hammingDistance = 0
         goal = 0
@@ -26,15 +27,15 @@ class Board:
                 self.manhattanDistance += abs(rowId - goalRow) + abs(colId - goalCol)
 
         # Find the empty tile and store its location in (self.rowZero, self.colZero)
-        self.rowZero, self.colZero = None, None      
+        self.rowZero, self.colZero = None, None
         for rowId, row in enumerate(self.tiles):
             for colId, t in enumerate(row):
-                if t == 0: self.rowZero, self.colZero = rowId, colId 
-        assert(self.rowZero != None and self.colZero != None) 
+                if t == 0: self.rowZero, self.colZero = rowId, colId
+        assert(self.rowZero != None and self.colZero != None)
 
     # Create a human-readable string representation
     def __str__(self):
-        strList = []        
+        strList = []
         for row in self.tiles:
             for t in row:
                 strList.append(f'{t:6d}')
@@ -48,7 +49,7 @@ class Board:
     def __eq__(self, other):
         if other == None: return False
         if not isinstance(other, Board): return False
-        
+
         if self.n != other.n: return False
         for rowId, row in enumerate(self.tiles):
             for colId, t in enumerate(row):
@@ -67,7 +68,7 @@ class Board:
 
     def hamming(self):
         return self.hammingDistance
-    
+
     def manhattan(self):
         return self.manhattanDistance
 
@@ -76,11 +77,11 @@ class Board:
 
     def isGoal(self):
         return self.hammingDistance == 0
-    
+
     def neighbors(self):
         # Create a neighbor board by switching (row, col) with (rowZero, colZero),
         #   where (rowZero, colZero) is the location of the empty tile
-        def createNeighbor(tiles, row, col):            
+        def createNeighbor(tiles, row, col):
             tiles[self.rowZero][self.colZero], tiles[row][col] = tiles[row][col], 0  # Switch two tiles
             neighbor = Board(self.tiles) # Create a neighbor with the switched tiles
             tiles[self.rowZero][self.colZero], tiles[row][col] = 0, tiles[self.rowZero][self.colZero] # Switch the tiles back to their original positions
@@ -105,7 +106,7 @@ class Board:
                 for colId, t in enumerate(row):
                     if t==numbers4Twin[0]: row1, col1 = rowId, colId
                     elif t==numbers4Twin[1]: row2, col2 = rowId, colId
-            
+
             # Swap the two tiles to create a twin board
             self.tiles[row1][col1], self.tiles[row2][col2] = self.tiles[row2][col2], self.tiles[row1][col1]
             self.twinBoard = Board(self.tiles)
@@ -115,9 +116,25 @@ class Board:
 
 
 def solveManhattan(initialBoard):
-    assert(isinstance(initialBoard, Board))
-    return None
-    
+    result = []
+    minPQ = PriorityQueue()
+    minPQ.put((initialBoard.manhattan(), initialBoard, 0, None))
+
+    while True:
+        minNode = minPQ.get()
+
+        if minNode[1].isGoal():# goal일 때
+            while minNode is not None:
+                result.append(minNode[1])
+                minNode = minNode[3]
+            result.reverse()
+            return result
+
+        #else안 써도 됨, 정답이 아니면 if에 안 걸리니깐
+        for neighbor in minNode[1].neighbors():
+            if minNode[3] is None or not neighbor.__eq__(minNode[3][1]): minPQ.put((minNode[2] + 1 + neighbor.manhattan(),neighbor,minNode[2] + 1,minNode))
+
+
 
 def solveNprint(initialBoard, solveFunction = solveManhattan):
         solution = solveFunction(initialBoard)
@@ -130,21 +147,21 @@ def solveNprint(initialBoard, solveFunction = solveManhattan):
 
 def correctnessTest(func, input, expected_len, expected_output, correct):
     print(f"{func.__name__}(\n{input})")
-    output = func(input)    
+    output = func(input)
     if output is not None and isinstance(output, list):
         if  len(output) == expected_len:
             if expected_output == None: print("Pass")
             elif expected_output == output: print("Pass")
-            else:    
+            else:
                 print(f"Fail - the output does not match the expected output")
-                correct = False                
+                correct = False
         else:
             print(f"Fail - length of output {len(output)} is not equal to {expected_len}")
             correct = False
     else:
         print(f"Fail - output is NOT a list")
         correct = False
-    print()    
+    print()
 
     return correct
 
@@ -154,17 +171,17 @@ if __name__ == "__main__":
     For visual inspection
     '''
     # Solvable in 0 move (already solved)
-    b0 = Board([[1,2,3],[4,5,6],[7,8,0]])    
+    b0 = Board([[1,2,3],[4,5,6],[7,8,0]])
     solveNprint(b0)
-    
+
     # Solvable in 4 moves
     b4 = Board([[0,1,3],[4,2,5],[7,8,6]])
-    solveNprint(b4)  
+    solveNprint(b4)
 
-    
+
     '''
     Unit Test
-    '''    
+    '''
     print("Correctness test for solveManhattan()")
     print("For each test case, if your answer does not appear within 10 seconds, then consider that you failed the case")
     print()
@@ -186,12 +203,12 @@ if __name__ == "__main__":
     b4_5_3 = Board([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20], [21, 22, 23, 0, 24]])
     b4_5_4 = Board([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10], [11, 12, 13, 14, 15], [16, 17, 18, 19, 20], [21, 22, 23, 24, 0]])
     correct = correctnessTest(solveManhattan, b4_5, 5, [b4_5, b4_5_1, b4_5_2, b4_5_3, b4_5_4], correct)
-    
+
     b3_2 = Board([[3, 1], [0, 2]])
     b3_2_1 = Board([[0, 1], [3, 2]])
     b3_2_2 = Board([[1, 0], [3, 2]])
     b3_2_3 = Board([[1, 2], [3, 0]])
-    correct = correctnessTest(solveManhattan, b3_2, 4, [b3_2, b3_2_1, b3_2_2, b3_2_3], correct)    
+    correct = correctnessTest(solveManhattan, b3_2, 4, [b3_2, b3_2_1, b3_2_2, b3_2_3], correct)
 
     b4_10 = Board([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                       [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
@@ -256,8 +273,8 @@ if __name__ == "__main__":
 
     b24 = Board([[3,2,1],[6,5,4],[0,7,8]])
     correct = correctnessTest(solveManhattan, b24, 25, None, correct)
-    
+
     print("This case takes several seconds, longer than the other cases")
     b34_4 = Board([[0, 1, 2, 3], [5, 6, 7, 4], [8, 9, 10, 11], [12, 13, 14, 15]])
     correct = correctnessTest(solveManhattan, b34_4, 35, None, correct)
-    
+
