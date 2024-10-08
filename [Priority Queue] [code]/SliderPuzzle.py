@@ -132,7 +132,7 @@ def solveManhattan(initialBoard):
 
         #else안 써도 됨, 정답이 아니면 if에 안 걸리니깐
         for neighbor in minNode[1].neighbors():
-            if minNode[3] is None or not neighbor.__eq__(minNode[3][1]): minPQ.put((minNode[2] + 1 + neighbor.manhattan(),neighbor,minNode[2] + 1,minNode))
+            if minNode[3] is None or not neighbor == (minNode[3][1]): minPQ.put((minNode[2] + 1 + neighbor.manhattan(),neighbor,minNode[2] + 1,minNode))
 
 
 
