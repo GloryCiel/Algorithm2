@@ -60,10 +60,9 @@ def sweepLine(segments):
         if e[1].isVertical():
             keys = tree.rangeSearch(e[1].y1, e[1].y2)
             for key in keys:
-                horizontal_segment = tree.get(key)
-                if horizontal_segment.x1 <= e[1].x1 <= horizontal_segment.x2:
-                    if ((horizontal_segment,e[1])) not in result:
-                        result.append((horizontal_segment, e[1]))
+                if tree.get(key).x1 <= e[1].x1 <= tree.get(key).x2:
+                    if ((tree.get(key),e[1])) not in result:
+                        result.append((tree.get(key), e[1]))
 
     return result
 
