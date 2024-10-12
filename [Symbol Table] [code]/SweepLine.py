@@ -1,3 +1,4 @@
+import queue
 from queue import PriorityQueue
 from RedBlackBST import LLRB
 
@@ -41,7 +42,31 @@ segments: list of Segment objects
 return value: list of Segment pairs that intersect
 '''
 def sweepLine(segments):
-    pass
+    minPQ = PriorityQueue()
+    result = []
+
+    for a in segments:
+        minPQ.put((a.x1,a))
+        minPQ.put((a.x2,a))
+
+    tree = LLRB()
+    while not minPQ.empty():
+        e = minPQ.get()
+        if e[1].isHorizontal():
+            if e[0] is e[1].x1:
+                tree.put(e[1].y1, e[1])#키가 y값 들어가는건 e[1]
+            if e[0] is e[1].x2:
+                tree.delete(e[1].y1)
+        if e[1].isVertical():
+            keys = tree.rangeSearch(e[1].y1, e[1].y2)
+            for key in keys:
+                horizontal_segment = tree.get(key)
+                if horizontal_segment.x1 <= e[1].x1 <= horizontal_segment.x2:
+                    if ((horizontal_segment,e[1])) not in result:
+                        result.append((horizontal_segment, e[1]))
+
+    return result
+
 
 
 def correctnessTest(func, input, expected_output, correct):
