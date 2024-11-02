@@ -70,7 +70,6 @@ def simulate(n, t):
 
 
 
-
 '''
 Simulate the performance of Quick Union
 '''

@@ -47,7 +47,7 @@ def sweepLine(segments):
 
     for a in segments:
         minPQ.put((a.x1,a))
-        minPQ.put((a.x2,a))
+        if a.isHorizontal():minPQ.put((a.x2,a))
 
     tree = LLRB()
     while not minPQ.empty():
@@ -60,9 +60,7 @@ def sweepLine(segments):
         if e[1].isVertical():
             keys = tree.rangeSearch(e[1].y1, e[1].y2)
             for key in keys:
-                if tree.get(key).x1 <= e[1].x1 <= tree.get(key).x2:
-                    if ((tree.get(key),e[1])) not in result:
-                        result.append((tree.get(key), e[1]))
+                    result.append((tree.get(key), e[1]))
 
     return result
 
