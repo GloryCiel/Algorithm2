@@ -187,10 +187,28 @@ Class that finds SCC (Strongly-Connected Components) and stores the results
 class SCC:
     def __init__(self, g): # Do strongly-connected-components pre-processing, based on Kosaraju-Sharir algorithm
         self.count = 0
-        self.id = []       
+        self.id = [-1 for _ in range(g.V)]
+        self.reverse_g = g.reverse()
+        self.topoorder = topologicalSort(self.reverse_g)
+        self.visited = [False for _ in range(g.V)]
+        def recur(graph, visited,v,count):
+            for w in graph.adj[v]:
+                if visited[w] is False:
+                    visited[w] = True
+                    self.id[w] = count
+                    recur(graph,visited,w,count)
+
+        for v in self.topoorder:
+            if self.visited[v] is False:
+                self.visited[v] = True
+                self.id[v] = self.count
+                recur(g,self.visited,v,self.count)
+                self.count+=1
 
     def connected(self, v, w): # Are v and w connected?
-        pass
+        if self.id[v] == self.id[w]: return True
+        else: return False
+
 
 
 def correctnessTest(g, expected_count, vertex_pairs, expected_output, correct):
@@ -315,7 +333,7 @@ if __name__ == "__main__":
 
 
     # Unit test for Kosaraju-Sharir for Finding Strongly-Connected Components
-    '''print("Correctness test for class SCC")
+    print("Correctness test for class SCC")
     print("For each test case, if your answer does not appear within 5 seconds, then consider that you failed the case")
     print()
     correct = True
@@ -431,7 +449,7 @@ if __name__ == "__main__":
         tDFS = timeit.timeit(lambda: DFSforEvaluation(g3), number=repeat) / repeat    
         print(f"{repeat} calls of connected() on g3 took {tSCC:.10f} sec on average, and the same number of calls of DFS() took {tDFS:.10f} sec on average")
         if tSCC*10 < tDFS: print("Pass")
-        else: print("Fail")'''
+        else: print("Fail")
     
 
 
