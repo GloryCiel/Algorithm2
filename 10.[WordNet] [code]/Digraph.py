@@ -242,8 +242,37 @@ def cycleDetection(g):
 Find the sap(shortest ancestral path) on digraph g between any vertex in aList and any vertex in bList
 Return the common ancestor and the length of sap
 '''
-def sap(g, aList, bList):    
-    pass          
+def sap(g, aList, bList):
+    def bfs(sources):
+        queue = Queue()
+        dist = [float('inf')] * g.V
+        for s in sources:
+            queue.put(s)
+            dist[s] = 0
+        while not queue.empty():
+            v = queue.get()
+            for w in g.adj[v]:
+                if dist[w] == float('inf'):
+                    queue.put(w)
+                    dist[w] = dist[v] + 1
+        return dist
+
+    distA = bfs(aList)
+    distB = bfs(bList)
+
+    minDist = float('inf')
+    ancestor = -1
+    for v in range(g.V):
+        if distA[v] != float('inf') and distB[v] != float('inf'):
+            totalDist = distA[v] + distB[v]
+            if totalDist < minDist:
+                minDist = totalDist
+                ancestor = v
+
+    if ancestor == -1:
+        return None, -1
+    return ancestor, minDist
+
 
 
 class WordNet:
@@ -329,7 +358,7 @@ def outcast(wordNet, wordFileName):
 
 
 if __name__ == "__main__":   
-    '''# Unit test for sap()
+    # Unit test for sap()
     print('digraph6.txt')
     d6 = Digraph.digraphFromFile('digraph6.txt')
     print(sap(d6, [1], [5]))
@@ -369,9 +398,9 @@ if __name__ == "__main__":
     else: print("fail")
     print(sap(d25, [13,23,24,17], [6,16,17,1]))  # (17,0)
     if sap(d25, [13,23,24,17], [6,16,17,1]) == (17,0): print("pass")
-    else: print("fail")'''
+    else: print("fail")
 
-    '''# Unit test with WordNet
+    # Unit test with WordNet
     print('WordNet test')
     wn = WordNet("synsets.txt", "hypernyms.txt")
     print(wn.isNoun("blue"))
@@ -418,9 +447,9 @@ if __name__ == "__main__":
     print(outcast(wn, "outcast9.txt"))
     tmp = outcast(wn, "outcast9.txt")
     if tmp != None and len(tmp) == 3 and tmp[0] == "fox": print("pass")
-    else: print("fail")'''
+    else: print("fail")
     
-    '''# Unit test for speed
+    # Unit test for speed
     print('speed test')
     n=1000
     d25 = Digraph.digraphFromFile('digraph25.txt')
@@ -428,7 +457,7 @@ if __name__ == "__main__":
     tSAP = timeit.timeit(lambda: sap(d25, [13,23,24], [6,16,17]), number=n)/n            
     print(f"{n} calls of sap() on d25 took {tSAP:.10f} sec on average, and the same number of calls of BFS() took {tBFS:.10f} sec on average")
     if tSAP < tBFS: print("pass")
-    else: print("fail")'''
+    else: print("fail")
     
 
     
