@@ -15,7 +15,7 @@ class Digraph:
     def addEdge(self, v, w): # Add a directed edge v->w. Self-loops and parallel edges are allowed
         if v<0 or v>=self.V: raise Exception(f"Vertex id {v} is not within the range [{0}-{(self.V-1)}]")
         if w<0 or w>=self.V: raise Exception(f"Vertex id {w} is not within the range [{0}-{(self.V-1)}]")
-        self.adj[v].append(w)        
+        self.adj[v].append(w)
         self.E += 1
 
     def outDegree(self, v):
@@ -51,7 +51,7 @@ class Digraph:
         with filePath.open('r') as f:
             phase = 0
             line = f.readline().strip() # Read a line, while removing preceding and trailing whitespaces
-            while line:                                
+            while line:
                 if len(line) > 0:
                     if phase == 0: # Read V, the number of vertices
                         g = Digraph(int(line))
@@ -59,31 +59,31 @@ class Digraph:
                     elif phase == 1: # Read edges
                         vw = line.split()
                         if len(vw) != 2: raise Exception(f"Invalid edge format found in {line}")
-                        g.addEdge(int(vw[0]), int(vw[1]))                        
+                        g.addEdge(int(vw[0]), int(vw[1]))
                 line = f.readline().strip()
         return g
-        
+
 
 '''
 Class for storing the results of depth-first search
 '''
-class DFS:    
+class DFS:
     # Constructor
     # Perform DFS on graph g starting from the source vertex s
-    def __init__(self, g, s): 
-        def recur(v):        
-            self.visited[v] = True            
+    def __init__(self, g, s):
+        def recur(v):
+            self.visited[v] = True
             for w in g.adj[v]:
-                if not self.visited[w]: 
+                if not self.visited[w]:
                     recur(w)
                     self.fromVertex[w] = v
         assert(isinstance(g, Digraph) and s>=0 and s<g.V)
         self.g, self.s = g, s
         self.visited = [False for _ in range(g.V)]
         self.fromVertex = [None for _ in range(g.V)]
-        recur(s)     
+        recur(s)
 
-    # Return a list of vertices on the path from s to v
+        # Return a list of vertices on the path from s to v
     #     based on the results of DFS
     def pathTo(self, v):
         if not self.visited[v]: return None
@@ -105,17 +105,17 @@ Class for storing the results of breadth-first search
 class BFS:
     # Constructor
     # PerformBDFS on graph g starting from the source vertex s
-    def __init__(self, g, s):        
+    def __init__(self, g, s):
         assert(isinstance(g, Digraph) and s>=0 and s<g.V)
         self.g, self.s = g, s
         self.visited = [False for _ in range(g.V)]
         self.fromVertex = [None for _ in range(g.V)]
         self.distance = [None for _ in range(g.V)]
         queue = Queue()
-        queue.put(s)        
+        queue.put(s)
         self.visited[s] = True
         self.distance[s] = 0
-        while queue.qsize() > 0:         
+        while queue.qsize() > 0:
             v = queue.get()
             for w in g.adj[v]:
                 if not self.visited[w]:
@@ -146,10 +146,10 @@ class BFS:
 def BFSforEvaluation(g):
     def bfs(s):
         queue = Queue()
-        queue.put(s)        
+        queue.put(s)
         visited[s] = True
         distance[s] = 0
-        while queue.qsize() > 0:         
+        while queue.qsize() > 0:
             v = queue.get()
             for w in g.adj[v]:
                 if not visited[w]:
@@ -169,16 +169,16 @@ def BFSforEvaluation(g):
 Perform the topological sort on a DAG g, and return list of vertices in reverse DFS postorder
 '''
 def topologicalSort(g):
-    def recur(v):        
-        visited[v] = True        
-        for w in g.adj[v]:            
+    def recur(v):
+        visited[v] = True
+        for w in g.adj[v]:
             if not visited[w]: recur(w)
         reverseList.append(v) # Add v to the stack if all adjacent vertices were visited                
 
     assert(isinstance(g, Digraph))
     visited = [False for _ in range(g.V)]
     reverseList = []
-    for v in range(g.V): 
+    for v in range(g.V):
         if not visited[v]: recur(v)
 
     reverseList.reverse()
@@ -190,14 +190,14 @@ Perform the topological sort on a DAG g, while detecing any cycle
     Otherwise, return list of vertices in reverse DFS postorder
 '''
 def topologicalSortWithCycleDetection(g):
-    def recur(v):        
+    def recur(v):
         visited[v] = True
         verticesInRecurStack.add(v)
         for w in g.adj[v]:
             if w in verticesInRecurStack: # Edge found to a vertex in the recursive stack
-                print("cycle detected on vertex", w)                
+                print("cycle detected on vertex", w)
                 return True
-            if not visited[w]: 
+            if not visited[w]:
                 if recur(w): return True
         reverseList.append(v) # Add v to the stack if all adjacent vertices were visited
         verticesInRecurStack.remove(v)
@@ -207,7 +207,7 @@ def topologicalSortWithCycleDetection(g):
     visited = [False for _ in range(g.V)]
     reverseList = []
     verticesInRecurStack = set() # Initialize set before the first call of recur()
-    for v in range(g.V): 
+    for v in range(g.V):
         if not visited[v]:
             #verticesInRecurStack = set() # Initialize set before the first call of recur()
             if recur(v): # Return None if a cycle is detected                
@@ -232,8 +232,8 @@ def cycleDetection(g):
     assert(isinstance(g, Digraph))
     visited = [False for _ in range(g.V)]
     verticesInRecurStack = set() # Initialize set before the first call of recur()
-    for v in range(g.V): 
-        if not visited[v]:            
+    for v in range(g.V):
+        if not visited[v]:
             if recur(v): return True
     return False
 
@@ -243,22 +243,33 @@ Find the sap(shortest ancestral path) on digraph g between any vertex in aList a
 Return the common ancestor and the length of sap
 '''
 def sap(g, aList, bList):
-    def bfs(sources):
-        queue = Queue()
-        dist = [float('inf')] * g.V
-        for s in sources:
-            queue.put(s)
-            dist[s] = 0
-        while not queue.empty():
-            v = queue.get()
-            for w in g.adj[v]:
-                if dist[w] == float('inf'):
-                    queue.put(w)
-                    dist[w] = dist[v] + 1
-        return dist
+    def bfs(sourcesA, sourcesB):
+        queueA = Queue()
+        queueB = Queue()
+        distA = [float('inf')] * g.V
+        distB = [float('inf')] * g.V
+        for s in sourcesA:
+            queueA.put(s)
+            distA[s] = 0
+        for s in sourcesB:
+            queueB.put(s)
+            distB[s] = 0
+        while not queueA.empty() or not queueB.empty():
+            if not queueA.empty():
+                v = queueA.get()
+                for w in g.adj[v]:
+                    if distA[w] == float('inf'):
+                        queueA.put(w)
+                        distA[w] = distA[v] + 1
+            if not queueB.empty():
+                v = queueB.get()
+                for w in g.adj[v]:
+                    if distB[w] == float('inf'):
+                        queueB.put(w)
+                        distB[w] = distB[v] + 1
+        return distA, distB
 
-    distA = bfs(aList)
-    distB = bfs(bList)
+    distA, distB = bfs(aList, bList)
 
     minDist = float('inf')
     ancestor = -1
@@ -282,17 +293,17 @@ class WordNet:
 
         # Create vertices        
         synsetFilePath = Path(__file__).with_name(synsetFileName)   # Use the location of the current .py file        
-        with synsetFilePath.open('r') as f:            
+        with synsetFilePath.open('r') as f:
             line = f.readline().strip() # Read a line, while removing preceding and trailing whitespaces
             while line:
                 if len(line) > 0:
                     tokens = line.split(',')
-                    self.synsets.append(tokens[1])                    
+                    self.synsets.append(tokens[1])
                     for word in tokens[1].split():
                         if word not in self.nounToIndex: self.nounToIndex[word] = []
                         self.nounToIndex[word].append(int(tokens[0]))
                 line = f.readline().strip()
-        self.g = Digraph(len(self.synsets))        
+        self.g = Digraph(len(self.synsets))
 
         # Create edges        
         hypernymFilePath = Path(__file__).with_name(hypernymFileName)   # Use the location of the current .py file 
@@ -303,14 +314,14 @@ class WordNet:
                     tokens = line.split(',')
                     v = int(tokens[0])
                     for idx in range(1, len(tokens)):
-                        self.g.addEdge(v, int(tokens[idx]))                    
+                        self.g.addEdge(v, int(tokens[idx]))
                 line = f.readline().strip()
-        
+
 
         # Check to see if the graph is a rooted DAG
         numVerticesWithZeroOutdegree = 0
         for v in range(self.g.V):
-            if self.g.outDegree(v) == 0: 
+            if self.g.outDegree(v) == 0:
                 numVerticesWithZeroOutdegree += 1
                 #print("vertex with 0 outdegree", self.synsets[v])
         if numVerticesWithZeroOutdegree != 1: raise Exception(f"The graph has {numVerticesWithZeroOutdegree} vertices with outdegree=0")
@@ -335,13 +346,13 @@ class WordNet:
 def outcast(wordNet, wordFileName):
     words = set()
     filePath = Path(__file__).with_name(wordFileName)   # Use the location of the current .py file   
-    with filePath.open('r') as f:        
+    with filePath.open('r') as f:
         line = f.readline().strip() # Read a line, while removing preceding and trailing whitespaces
-        while line:                                
+        while line:
             if len(line) > 0:
-                words.update(line.split())                              
+                words.update(line.split())
             line = f.readline().strip()
-    
+
     maxDistance = -1
     maxDistanceWord = None
     for nounA in words:
@@ -353,11 +364,11 @@ def outcast(wordNet, wordFileName):
         if distanceSum > maxDistance:
             maxDistance = distanceSum
             maxDistanceWord = nounA
-    
+
     return maxDistanceWord, maxDistance, words
 
 
-if __name__ == "__main__":   
+if __name__ == "__main__":
     # Unit test for sap()
     print('digraph6.txt')
     d6 = Digraph.digraphFromFile('digraph6.txt')
@@ -429,8 +440,8 @@ if __name__ == "__main__":
     print(wn.sap("George_W._Bush", "chimpanzee"))
     tmp = wn.sap("George_W._Bush", "chimpanzee")
     if tmp != None and len(tmp) == 2 and tmp[1] == 17: print("pass")
-    else: print("fail")    
-    
+    else: print("fail")
+
     print('outcast test')
     print(outcast(wn, "outcast5.txt"))
     tmp = outcast(wn, "outcast5.txt")
@@ -448,13 +459,13 @@ if __name__ == "__main__":
     tmp = outcast(wn, "outcast9.txt")
     if tmp != None and len(tmp) == 3 and tmp[0] == "fox": print("pass")
     else: print("fail")
-    
+
     # Unit test for speed
     print('speed test')
     n=1000
     d25 = Digraph.digraphFromFile('digraph25.txt')
     tBFS = timeit.timeit(lambda: BFSforEvaluation(d25), number=n)/n
-    tSAP = timeit.timeit(lambda: sap(d25, [13,23,24], [6,16,17]), number=n)/n            
+    tSAP = timeit.timeit(lambda: sap(d25, [13,23,24], [6,16,17]), number=n)/n
     print(f"{n} calls of sap() on d25 took {tSAP:.10f} sec on average, and the same number of calls of BFS() took {tBFS:.10f} sec on average")
     if tSAP < tBFS: print("pass")
     else: print("fail")
