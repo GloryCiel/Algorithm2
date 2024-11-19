@@ -295,12 +295,35 @@ def mstPrimLazy(g):
 Find an MST (Minimum Spanning Tree) using Prim's algorithm (eager version)
     and return the MST with its weight sum
 '''
-def mstPrimEager(g):    
-    return [], 0.0
+def mstPrimEager(g):
+    def include(v):
+        included[v] = True
+        for e in g.adj[v]:
+            idx = e.other(v)
+            if included[idx] is False:
+                if pq.contains(idx):
+                    if pq.keyOf(idx) > e:
+                        pq.decreaseKey(idx, e)
+                else:
+                    pq.insert(idx, e)
+
+    edgesInMST = []
+    included = [False] * g.V
+    weightSum = 0
+    pq = IndexMinPQ(g.V)
+    include(0)
+
+    while len(edgesInMST) < g.V - 1:
+        eKey, eIdx = pq.delMin()
+        edgesInMST.append(eKey)
+        weightSum += eKey.weight
+        include(eIdx)
+
+    return edgesInMST, weightSum
 
 
 if __name__ == "__main__":
-    '''# Unit test for Edge and WUGraph
+    # Unit test for Edge and WUGraph
     e1 = Edge(2,3,0.1)
     e2 = Edge(2,3,0.1)
     e3 = Edge(2,3,0.2)
@@ -311,9 +334,9 @@ if __name__ == "__main__":
     print(e1.other(2))
     
     g8 = WUGraph.fromFile("wugraph8.txt")
-    print(g8)'''    
+    print(g8)
 
-    '''
+
     # Unit test for the min PQ
     minPQ = IndexMinPQ(10)
     minPQ.insert(0,'P')
@@ -340,7 +363,7 @@ if __name__ == "__main__":
     print(minPQ.delMin())
     print(minPQ.delMin())
     print(minPQ.delMin())    
-    '''
+
     
     # Unit Test for mstPrimEager()
     g3 = WUGraph.fromFile("wugraph3.txt")    
