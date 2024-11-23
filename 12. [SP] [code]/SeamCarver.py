@@ -91,8 +91,54 @@ class SeamCarver:
         self.image = carvedImage
 
     def findVerticalSeam(self):
-        # Add codes below
-        return [0] * self.height()
+        distTo = [[0 for _ in range(self.width())]for _ in range(self.height())]
+        for col in range(self.width()):
+            distTo[0][col] = self.MAX_ENERGY
+        edgeTo = [[0 for _ in range(self.width())]for _ in range(self.height())]
+        for col in range(self.width()):
+            edgeTo[0][col] = None
+
+        for y in range(1,self.height()):
+            for x in range (0,self.width()):
+                if x == 0:
+                    Min = min(distTo[y-1][x],distTo[y-1][x+1])
+                    distTo[y][x] = Min + self.energy(x,y)
+                    if Min == distTo[y-1][x]:
+                        edgeTo[y][x] = x
+                    else:
+                        edgeTo[y][x] = x+1
+                elif x == self.width()-1:
+                    Min = min(distTo[y-1][x],distTo[y-1][x-1])
+                    distTo[y][x] = Min + self.energy(x,y)
+                    if Min == distTo[y-1][x]:
+                        edgeTo[y][x] = x
+                    else:
+                        edgeTo[y][x] = x-1
+                else:
+                    Min = min(distTo[y-1][x],distTo[y-1][x-1],distTo[y-1][x+1])
+                    distTo[y][x] = Min + self.energy(x,y)
+                    if Min == distTo[y-1][x]:
+                        edgeTo[y][x] = x
+                    elif Min == distTo[y-1][x-1]:
+                        edgeTo[y][x] = x-1
+                    else:
+                        edgeTo[y][x] = x+1
+
+        result = [0] * self.height()
+        Min = distTo[self.height()-1][0]
+        x_min = 0
+        for i in range(1,self.width()):
+            if distTo[self.height()-1][i]<Min:
+                Min = distTo[self.height()-1][i]
+                x_min = i
+
+        for y in range (self.height()-1,-1,-1):
+            result[y] = x_min
+            x_min = edgeTo[y][x_min]
+
+
+
+        return result
 
 
 def showBeforeAfterSeamCarving(fileName, numCarve):
@@ -129,16 +175,16 @@ def convertToGrayScale(image):
 
 
 if __name__ == "__main__":        
-    '''
+
     # Unit test for convertToGrayScale()    
     image_color = Image.open(Path(__file__).with_name("heart.jpg")) # Use the location of the current .py file    
     image_gray = convertToGrayScale(image_color)
     image_color.show()
     image_gray.show()
-    '''    
+
 
     
-    '''# Unit test 1 for vertical seam    
+    # Unit test 1 for vertical seam
     image = Image.new("RGB", (10,10), "white")
     pixels = image.load()
     for row in range(image.size[0]):         
@@ -181,10 +227,10 @@ if __name__ == "__main__":
     if int(sc.energySumOverVerticalSeam(vs)) == 4880: print("pass")
     else: print("fail")
     sc.removeVerticalSeam(vs)
-    # sc.width() == 5'''
+    # sc.width() == 5
 
     
-    '''# Unit test 2 for vertical seam
+    # Unit test 2 for vertical seam
     image2 = Image.new("RGB", (3,10), "white")
     sc2 = SeamCarver(image2)
     vs2 = sc2.findVerticalSeam()
@@ -210,7 +256,7 @@ if __name__ == "__main__":
     sc3 = SeamCarver(image3)
     vs3 = sc3.findVerticalSeam()
     if int(sc3.energySumOverVerticalSeam(vs3)) == 2000: print("pass")
-    else: print("fail")'''
+    else: print("fail")
     
     
     # Unit test 3: visual inpsection for seam carving
@@ -219,7 +265,7 @@ if __name__ == "__main__":
     showBeforeAfterSeamCarving("piplub.jpg", 30)   # carving 후에 흰 부분만 삭제되고 piplub은 유지되어야 함
 
     
-    '''# Speed test (effective only when you pass the accuracy test)
+    # Speed test (effective only when you pass the accuracy test)
     image3 = Image.open(Path(__file__).with_name("piplub.jpg")) # Use the location of the current .py file
     sc3 = SeamCarver(image3)
     n=20
@@ -228,6 +274,5 @@ if __name__ == "__main__":
     print(f"Finding {n} vertical seams on a 100x100 image took {tVerticalSeam:.10f} sec on average")
     print(f"Creating {n} gray scale images on a 100x100 image took {tGrayScale:.10f} sec on average")    
     if (tVerticalSeam < 12 * tGrayScale): print("pass for speed test")
-    else: print("fail for speed test")'''
-    
+    else: print("fail for speed test")
     
