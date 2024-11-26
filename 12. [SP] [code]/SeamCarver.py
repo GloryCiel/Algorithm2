@@ -136,8 +136,6 @@ class SeamCarver:
             result[y] = x_min
             x_min = edgeTo[y][x_min]
 
-
-
         return result
 
 
