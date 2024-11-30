@@ -254,7 +254,54 @@ class BaseballElimination:
     # Return (True, a list of team names responsible for the elimination), if teamName must be eliminated
     # Return (False, []), if teamName is NOT eliminated yet
     def isEliminated(self, teamName):
-        return True, []
+        teamId = self.team2id[teamName]
+        maxWins = self.wins[teamId] + self.remaining[teamId]
+        responsibleTeams = []
+
+        for i in range(self.numberOfTeams):
+            if i != teamId and self.wins[i] > maxWins:
+                responsibleTeams.append(self.teams[i])
+
+        if len(responsibleTeams) > 0:
+            return True, responsibleTeams
+
+        V = 2 + (self.numberOfTeams - 1) + (self.numberOfTeams - 1) * (self.numberOfTeams - 2) // 2
+        network = FlowNetwork(V)
+        s = 0
+        t = V - 1
+
+        gameVertex = 1
+        teamVertex = gameVertex + (self.numberOfTeams - 1) * (self.numberOfTeams - 2) // 2
+
+        for i in range(self.numberOfTeams):
+            if i == teamId:
+                continue
+            for j in range(i + 1, self.numberOfTeams):
+                if j == teamId:
+                    continue
+                network.addEdge(FlowEdge(s, gameVertex, self.against[i][j]))
+                network.addEdge(FlowEdge(gameVertex, teamVertex + i, float('inf')))
+                network.addEdge(FlowEdge(gameVertex, teamVertex + j, float('inf')))
+                gameVertex += 1
+
+        for i in range(self.numberOfTeams):
+            if i == teamId:
+                continue
+            capacity = maxWins - self.wins[i]
+            if capacity < 0:
+                capacity = 0
+            network.addEdge(FlowEdge(teamVertex + i, t, capacity))
+
+        Ford = FordFulkerson(network, s, t)
+
+        for i in range(self.numberOfTeams):
+            if i != teamId and Ford.inCut(teamVertex + i):
+                responsibleTeams.append(self.teams[i])
+
+        if len(responsibleTeams) > 0:
+            return True, responsibleTeams
+        else:
+            return False, []
 
 
 if __name__ == "__main__":
@@ -463,7 +510,7 @@ if __name__ == "__main__":
     print()
     '''
 
-    '''# Unit test for BaseballElimination
+    # Unit test for BaseballElimination
     be4 = BaseballElimination("teams4.txt")
     print(be4)
     be4.printResult()    
@@ -522,4 +569,4 @@ if __name__ == "__main__":
     if be12.isEliminated("Chile") == (True, ['Poland', 'USA', 'Brazil', 'Iran']): print("P ",end='')
     else: print("F ",end='')
     print()
-    print()'''
+    print()
